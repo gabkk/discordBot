@@ -28,7 +28,7 @@ async function sendEthToDaiContractOwner(message){
 	// Check the value of the Dai contract Creator
 	await web3.eth.getBalance(DAI_CREATOR)
 							.then(receipt=> {
-								message.channel.send('Current balance of the Dai contract creator: ' + receipt + ' wei');
+								message.channel.send('Current balance of the Dai contract creator: ' + web3.utils.fromWei(receipt, 'ether') + ' eth');
 								console.log(receipt);
 							})
 							.catch((e) => {console.log(e)});
@@ -63,35 +63,35 @@ async function sendEthToDaiContractOwner(message){
 								});
 
 	await web3.eth.getBalance(DAI_CREATOR).then(receipt=> {
-			message.channel.send('Dai contract balance After funding: ' + receipt + ' wei');
+			message.channel.send('Dai contract balance After funding: ' + web3.utils.fromWei(receipt, 'ether') + ' eth');
 			console.log(receipt);
 		  })
 		  .catch((e) => {console.log(e)});
 
 }
 
-async function transfertDaiFromUnlockedAddr(message){
-	console.log(registry.methods);
-	let tokens = await registry.methods.balanceOf(unlockedAddress).call()
-		.catch((e) => {console.log(e);});
-	console.log("tokens unlockedAddress");
-	console.log(tokens);
+// ADD thisl later
+// async function transfertDaiFromUnlockedAddr(message){
+// 	console.log(registry.methods);
+// 	let tokens = await registry.methods.balanceOf(unlockedAddress).call()
+// 		.catch((e) => {console.log(e);});
+// 	console.log("tokens unlockedAddress");
+// 	console.log(tokens);
 
-		let ret = await registry.methods.transfer(unlockedAddress, 1800000000000000).send({
-		from: walesAddr, 
-		gas: 0x00, 
-		gasPrice: 0x00
-	}).then(receipt=> {console.log(receipt)});
-	tokens = await registry.methods.balanceOf(unlockedAddress).call()
-		.catch((e) => {console.log(e);});
-	console.log("tokens unlockedAddress");
-	console.log(tokens);
-}
+// 		let ret = await registry.methods.transfer(unlockedAddress, 1800000000000000).send({
+// 		from: walesAddr, 
+// 		gas: 0x00, 
+// 		gasPrice: 0x00
+// 	}).then(receipt=> {console.log(receipt)});
+// 	tokens = await registry.methods.balanceOf(unlockedAddress).call()
+// 		.catch((e) => {console.log(e);});
+// 	console.log("tokens unlockedAddress");
+// 	console.log(tokens);
+// }
 
-async function mintDaiFromErc20Contract(recipientAddress, amount, message) {
+async function mintDaiFromErc20Contract(recipientAddress, amount, web3, message) {
 	
 	var daiInterface = new web3.eth.Contract(DAI_ABI, DAI_ADDRESS);
-
     	tokens = await daiInterface.methods.balanceOf(recipientAddress).call()
 			.catch((e) => {console.log(e);});
 
@@ -99,9 +99,10 @@ async function mintDaiFromErc20Contract(recipientAddress, amount, message) {
 			from: DAI_CREATOR,
 			gas: 6000000
 		}).then(receipt=> {
-			message.channel.send(ammount + ' Dai succefully mint and sent to ' + recipientAddress);
+			message.channel.send(web3.utils.fromWei(amount, 'ether') + ' Dai succefully mint and sent to ' + recipientAddress);
 		}).catch((e) => {
-			message.channel.send("Cant mint new token try to call !foundDai and try again");
+			console.log(e);
+			message.channel.send("Cant mint new token try to call !fixFaucet and try again");
 		});
 
 		tokens = await daiInterface.methods.balanceOf(recipientAddress).call()
@@ -113,7 +114,6 @@ async function mintDaiFromErc20Contract(recipientAddress, amount, message) {
 
 client.once('ready', () => {
 	console.log('Ready!');
-
 });
 
 client.on("message", (message) => {
@@ -126,8 +126,12 @@ client.on("message", (message) => {
 
 	switch (command) {
 		case "info" :
+			message.channel.send("Hey this is the current function available");
+			message.channel.send("!fixFaucet / Send eth to the dai creator address (this address need eth to mint Dai)");
+			message.channel.send("!faucet YOUR_ADDRESS AMOUNT_OF_DAI/ this command will mint dai and send it to your address");
+			message.channel.send("!ping / this command is useless but at least you know the bot is alive");
 			break;
-		case "foundDai":
+		case "fixFaucet":
 			message.channel.send("Send fund to the dai contract's creator address");
 			sendEthToDaiContractOwner(message);
 
@@ -162,6 +166,4 @@ client.on("message", (message) => {
 			break;
 	}
 });
-console.log("TOKEN");
-console.log(config.token);
 client.login(config.token);
