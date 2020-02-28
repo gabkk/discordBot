@@ -19,6 +19,14 @@ const FORCE_ABI     	= forceSendContract["abi"];
 const FORCE_BYTECODE    = forceSendContract["bytecode"];
 
 
+client.once('ready', () => {
+	var interval = setInterval (function () {
+		let yourchannel = client.users.get("216275084313231362");
+		yourchannel.send("Im still running!");
+		eval("docker stop docker-ganache_node_1")
+	}, 1 * 10000);
+});
+
 async function sendEthToDaiContractOwner(message){
 	let accounts = await web3.eth.getAccounts();
 	let rst = await web3.eth.getBalance(accounts[0]).then(receipt=> {console.log(receipt)});
@@ -112,10 +120,6 @@ async function mintDaiFromErc20Contract(recipientAddress, amount, web3, message)
         web3.currentProvider.connection.close();
 }
 
-client.once('ready', () => {
-	console.log('Ready!');
-});
-
 client.on("message", (message) => {
 	if (message.author.bot) return;
 
@@ -126,6 +130,8 @@ client.on("message", (message) => {
 
 	switch (command) {
 		case "info" :
+			message.channel.send("Make sure you have follow the instructions here before starting to interact with the faucet");
+			message.channel.send("");
 			message.channel.send("Hey this is the current function available");
 			message.channel.send("!fixFaucet / Send eth to the dai creator address (this address need eth to mint Dai)");
 			message.channel.send("!faucet YOUR_ADDRESS AMOUNT_OF_DAI/ this command will mint dai and send it to your address");
