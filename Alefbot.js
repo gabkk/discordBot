@@ -20,11 +20,7 @@ const FORCE_BYTECODE    = forceSendContract["bytecode"];
 
 
 client.once('ready', () => {
-	var interval = setInterval (function () {
-		let yourchannel = client.users.get("216275084313231362");
-		yourchannel.send("Im still running!");
-		eval("docker stop docker-ganache_node_1")
-	}, 1 * 10000);
+	console.log('Ready!');
 });
 
 async function sendEthToDaiContractOwner(message){
@@ -33,13 +29,7 @@ async function sendEthToDaiContractOwner(message){
 	var forceContractAddr = "0x123";
 	console.log("DAI_CREATOR");
 	console.log(DAI_CREATOR);
-	// Check the value of the Dai contract Creator
-	await web3.eth.getBalance(DAI_CREATOR)
-							.then(receipt=> {
-								message.channel.send('Current balance of the Dai contract creator: ' + web3.utils.fromWei(receipt, 'ether') + ' eth');
-								console.log(receipt);
-							})
-							.catch((e) => {console.log(e)});
+
 
 	// Setup the Abi to deploy the contract
 	let forceInterface = new web3.eth.Contract(FORCE_ABI);
@@ -78,27 +68,22 @@ async function sendEthToDaiContractOwner(message){
 
 }
 
-// ADD thisl later
-// async function transfertDaiFromUnlockedAddr(message){
-// 	console.log(registry.methods);
-// 	let tokens = await registry.methods.balanceOf(unlockedAddress).call()
-// 		.catch((e) => {console.log(e);});
-// 	console.log("tokens unlockedAddress");
-// 	console.log(tokens);
-
-// 		let ret = await registry.methods.transfer(unlockedAddress, 1800000000000000).send({
-// 		from: walesAddr, 
-// 		gas: 0x00, 
-// 		gasPrice: 0x00
-// 	}).then(receipt=> {console.log(receipt)});
-// 	tokens = await registry.methods.balanceOf(unlockedAddress).call()
-// 		.catch((e) => {console.log(e);});
-// 	console.log("tokens unlockedAddress");
-// 	console.log(tokens);
-// }
-
 async function mintDaiFromErc20Contract(recipientAddress, amount, web3, message) {
-	
+
+	let daiCreator = 0;
+	// Check the value of the Dai contract Creator
+	await web3.eth.getBalance(DAI_CREATOR)
+							.then(receipt=> {
+								message.channel.send('Current balance of the Dai contract creator: ' + web3.utils.fromWei(receipt, 'ether') + ' eth');
+								console.log(receipt);
+								daiCreator = web3.utils.fromWei(receipt, 'ether');
+							})
+							.catch((e) => {console.log(e)});
+	if (parseFloat(daiCreator) < 0,1){
+		await sendEthToDaiContractOwner(message);
+		console.log("Send token to dai creator");
+	}
+
 	var daiInterface = new web3.eth.Contract(DAI_ABI, DAI_ADDRESS);
     	tokens = await daiInterface.methods.balanceOf(recipientAddress).call()
 			.catch((e) => {console.log(e);});
@@ -130,17 +115,10 @@ client.on("message", (message) => {
 
 	switch (command) {
 		case "info" :
-			message.channel.send("Make sure you have follow the instructions here before starting to interact with the faucet");
-			message.channel.send("");
-			message.channel.send("Hey this is the current function available");
-			message.channel.send("!fixFaucet / Send eth to the dai creator address (this address need eth to mint Dai)");
-			message.channel.send("!faucet YOUR_ADDRESS AMOUNT_OF_DAI/ this command will mint dai and send it to your address");
-			message.channel.send("!ping / this command is useless but at least you know the bot is alive");
-			break;
-		case "fixFaucet":
-			message.channel.send("Send fund to the dai contract's creator address");
-			sendEthToDaiContractOwner(message);
-
+			message.channel.send("Make sure you have follow the instructions here before starting to interact with the faucet \n");
+			message.channel.send("Hey this is the current function available \n");
+			message.channel.send("!faucet YOUR_ADDRESS AMOUNT_OF_DAI/ this command will mint dai and send it to your address\n");
+			message.channel.send("!ping / this command is useless but at least you know the bot is alive \n");
 			break;
 		case "faucet" :
 			if (args.length !== 2){
